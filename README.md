@@ -1,158 +1,123 @@
-# Online Blood Bank System (React + Flask + DynamoDB + AWS)
+# HemoCloud-X: Online Blood Bank System
 
-## What this includes
-1. `Donor` registration form (`/donor`) with medical report + profile image upload to **AWS S3**
-2. `Receiver` search (`/receiver`) by `bloodGroup` + `location` (+ optional `availableNow`)
-3. Donor profile page (`/donor/:id`) showing profile image, health status, and medical report link
-4. Backend REST APIs + DynamoDB data model
-5. Optional AWS integration: S3 now, SNS later
+HemoCloud-X is a modern, responsive, and secure city-wide donor coordination platform that connects blood donors with patients in need during planned medical procedures and urgent emergencies.
 
 ---
 
-## Folder structure
-- `frontend/` - React + Tailwind UI
-- `backend/` - backend configuration files
-- `backend/flask_api/` - Python Flask REST API + DynamoDB + optional AWS clients
+## 🎯 What Problem It Solves
+Finding matching blood donors during critical hours is often a chaotic process involving disparate social media posts and unverified WhatsApp messages. HemoCloud-X provides a centralized, validated "Regional Emergency Network" where:
+- **Receivers** can search for specific blood groups in their city in real-time.
+- **Donors** can maintain an updated profile, keeping their availability and medical records on file.
+- The platform ensures data persistence, medical proof uploads, and high availability, reducing the critical time-to-find during medical emergencies.
 
 ---
 
-## Prerequisites
+## 🌟 Features
+- **Real-Time Donor Search**: Quickly locate eligible donors based on matching blood types, location (city), and current availability status.
+- **Secure Medical Uploads**: File uploads for medical reports and profile pictures are securely pushed to AWS S3.
+- **Donor Profiles**: Individual pages showcasing the donor's health status, contact information, and verified medical documentation.
+- **Availability Tracking**: Automatic determination of "Available Now" status if a donor hasn't donated within their eligible resting period (e.g., 90 days).
+- **Modern User Interface**: A beautifully crafted dark-themed interface built with React, Tailwind CSS, and glassmorphism elements.
+
+---
+
+## 🏗️ Architecture
+The system uses a decoupled frontend-backend architecture integrated with scalable cloud storage solutions.
+
+1. **Client / Frontend**: A Single Page Application (SPA) built using React.js that consumes standard REST APIs.
+2. **REST API / Backend**: A Python Flask microservice that serves as the controller, handling request validation, routing, and communication with the cloud layer.
+3. **Primary Database**: AWS DynamoDB acts as a highly scalable NoSQL data store, maintaining user records, search indexes, and metadata for files.
+4. **Blob Storage**: AWS Simple Storage Service (S3) handles all binary data (images, PDF medical reports) leaving the database lightweight.
+
+---
+
+## 🛠️ Tools Used
+- **Frontend Core**: React 18, React Router DOM, Vite
+- **Frontend Styling**: Tailwind CSS, PostCSS, Autoprefixer
+- **Backend Core**: Python 3.9, Flask 3.0, Flask-CORS
+- **Cloud Integrations**: `boto3` (AWS SDK for Python)
+- **Database**: AWS DynamoDB
+- **Storage**: AWS S3
+- **Configuration**: `python-dotenv` for backend, Vite environment variables for frontend
+
+---
+
+## ⚙️ How It Works (Working Mechanism)
+1. **Donor Registration**: A user visits `/donor` and submits a `multipart/form-data` request containing their details and files.
+2. **File Processing**: The Flask backend intercepts the request and securely uploads the medical report and profile picture directly into an AWS S3 Bucket, generating public or signed secure URLs.
+3. **Database Insertion**: The backend maps the user details plus the S3 URLs into a JSON document and inserts it into the AWS DynamoDB `bloodbank-donors-dev` table.
+4. **Search Mechanism**: A receiver queries `/receiver` with parameters like `O+` and `Chennai`. The backend queries DynamoDB with these parameters and filters active donors.
+5. **Data Hydration**: The React frontend maps the JSON response and displays available Donors.
+
+---
+
+## 📂 Folder Structure
+- `frontend/` - React + Tailwind UI application
+- `backend/flask_api/` - Python Flask REST API + AWS client services
+- `backend/.env` - Backend environment settings
+
+---
+
+## 🚀 Getting Started & Setup
+
+### Prerequisites
 - Node.js (v18+ recommended)
-- An AWS account with an S3 bucket
-- A DynamoDB table for donors
+- Python 3.9+
+- An AWS account with an S3 bucket & DynamoDB table
 
----
+### AWS S3 Setup
+Ensure your S3 bucket permissions allow reading (`s3:GetObject`) if you opt to use public object URLs, and provide the backend an IAM user with `s3:PutObject` access.
 
-## AWS S3 setup
+### Environment variables
 
-### 1) Create an S3 bucket
-Example: `my-blood-bank-bucket`
-
-### 2) IAM credentials for the backend
-Create an IAM access key for the backend with permissions like:
-- `s3:PutObject` on `arn:aws:s3:::YOUR_BUCKET_NAME/*`
-- `s3:GetObject` on `arn:aws:s3:::YOUR_BUCKET_NAME/*`
-
-The backend uses these environment variables:
-- `AWS_ACCESS_KEY_ID`
-- `AWS_SECRET_ACCESS_KEY`
-- `AWS_REGION`
-
-### 3) How object URLs work in this code
-This implementation saves **public S3 URLs** with donor records in DynamoDB and renders them directly.
-
-That means your bucket/object must be readable via public URLs.
-You can do either:
-- Make the bucket objects public for reading (`s3:GetObject` public), OR
-- Keep the bucket private and update the backend to generate **signed URLs** at read-time.
-
-If you keep it public, ensure your S3 bucket policy allows `s3:GetObject` for reads.
-
-### 4) (Optional) Custom URL base
-If you are fronting S3 with CloudFront or want a custom URL domain, set:
-`S3_PUBLIC_URL_BASE=https://your-cdn-or-base-domain`
-
----
-
-## Environment variables
-
-### Backend (`backend/.env`)
-Copy from `backend/.env.example` and fill:
+**Backend (`backend/.env`)**
+Copy `backend/.env.example` to `backend/.env` and fill:
 - `AWS_REGION`
 - `AWS_ACCESS_KEY_ID`
 - `AWS_SECRET_ACCESS_KEY`
 - `S3_BUCKET_NAME`
 - `DYNAMODB_DONORS_TABLE`
-- `CORS_ORIGIN` (should match your frontend)
+- `CORS_ORIGIN=http://localhost:5173`
 
-### Frontend (`frontend/.env`)
-Copy from `frontend/.env.example`:
-- `VITE_API_BASE_URL=http://localhost:5000`
+**Frontend (`frontend/.env`)**
+Create `frontend/.env` and add:
+`VITE_API_BASE_URL=http://localhost:5001` (Or whatever port your Flask app uses)
 
 ---
 
-## Install dependencies
-Run these from the project root:
+## 💻 Running Locally
 
-### Backend
-```bash
-cd backend
-npm install
-```
-
-### Flask API (Python backend)
+### 1. Start the Flask Backend
 ```bash
 cd backend/flask_api
 python -m venv .venv
-.venv\Scripts\activate
+source .venv/bin/activate  # Or .venv\Scripts\activate on Windows
 pip install -r requirements.txt
-```
-
-### Frontend
-```bash
-cd ../frontend
-npm install
-```
-
----
-
-## Run locally
-
-### 1) Start the backend
-```bash
-cd backend
-npm run dev
-```
-Backend runs on `PORT=5000` by default.
-
-### Flask alternative (same API endpoints)
-```bash
-cd backend/flask_api
-.venv\Scripts\activate
 python app.py
 ```
-Flask API also runs on `PORT=5000` by default.
+*(Backend runs on PORT=5001 by default as per `.env` configuration).*
 
-### 2) Start the frontend
-In a second terminal:
+### 2. Start the React Frontend
+Open a new terminal:
 ```bash
 cd frontend
+npm install
 npm run dev
 ```
-Frontend runs on `http://localhost:5173`.
+*(Frontend runs on `http://localhost:5173`).*
 
 ---
 
-## REST API endpoints
+## 📡 REST API Endpoints
 
 ### 1) Register donor
-`POST /api/donor/register`
-- `multipart/form-data`
-- Fields:
-  - `name`
-  - `age`
-  - `gender`
-  - `bloodGroup`
-  - `phone`
-  - `email`
-  - `location`
-  - `lastDonationDate` (YYYY-MM-DD)
-  - `healthStatus`
-  - `medicalReport` (file)
-  - `profileImage` (file)
+`POST /api/donor/register` (Requires `multipart/form-data`)
+Fields: `name`, `age`, `gender`, `bloodGroup`, `phone`, `email`, `location`, `lastDonationDate`, `healthStatus`, `medicalReport` (file), `profileImage` (file).
 
 ### 2) Search donors
 `GET /api/donor/search?bloodGroup=O+&location=Chennai&availableNow=true`
-- `bloodGroup` and `location` are required
-- optional `availableNow=true` filters donors whose last donation is older than `AVAILABLE_NOW_THRESHOLD_DAYS` (default `90`)
+Filters donors by blood group, location, and a 90-day availability threshold.
 
-### 3) Get donor by id
+### 3) Get donor by ID
 `GET /api/donor/:id`
-
----
-
-## Deployment readiness
-- Backend uses environment variables only (no hard-coded secrets)
-- REST APIs are separated under `/api`
-- S3 upload is done server-side (not exposed to the browser)
-
+Returns a specific donor for the `/donor/:id` profile views.
