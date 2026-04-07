@@ -188,9 +188,10 @@ export default function DonorRegister() {
               <Field label="Age">
                 <input
                   value={age}
-                  onChange={(e) => setAge(e.target.value)}
+                  onChange={(e) => setAge(e.target.value.replace(/\D/g, ""))}
                   className="w-full rounded-xl border border-white/10 bg-slate-900/30 px-3 py-2 outline-none focus:ring-2 focus:ring-red-400/40"
                   placeholder="e.g., 25"
+                  maxLength={3}
                 />
               </Field>
 
@@ -225,10 +226,10 @@ export default function DonorRegister() {
               <Field label="Phone Number">
                 <input
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
                   className="w-full rounded-xl border border-white/10 bg-slate-900/30 px-3 py-2 outline-none focus:ring-2 focus:ring-red-400/40"
                   placeholder="e.g., 9876543210"
-                  maxLength={15}
+                  maxLength={10}
                 />
               </Field>
 

@@ -51,10 +51,6 @@ export default function Home() {
                 <div className="text-xs uppercase tracking-[0.18em] text-white/60">Response Readiness</div>
                 <div className="mt-2 text-3xl font-extrabold text-emerald-300">24 x 7</div>
               </div>
-              <div className="rounded-2xl border border-white/15 bg-slate-900/60 p-5 shadow-lg backdrop-blur-sm">
-                <div className="text-xs uppercase tracking-[0.18em] text-white/60">Storage Pipeline</div>
-                <div className="mt-2 text-3xl font-extrabold text-cyan-300">AWS S3 + DynamoDB</div>
-              </div>
             </div>
           </div>
 
