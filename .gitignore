@@ -9,6 +9,11 @@ __pycache__/
 # Virtual environments
 .venv/
 venv/
+.vscode/
+
+# Security
+*.pem
+.env/
 backend/flask_api/.venv/
 
 # Node

@@ -16,7 +16,11 @@ rm -rf ~/HemoCloud-X
 git clone https://github.com/Ashifash2005/HemoCloud-X.git ~/HemoCloud-X
 
 # 3. Setup Backend Environments
-cp ~/.env ~/HemoCloud-X/backend/.env
+if [ -f ~/.env ]; then
+  cp ~/.env ~/HemoCloud-X/backend/.env
+else
+  echo "Warning: ~/.env not found. Please create backend/.env manually."
+fi
 cd ~/HemoCloud-X/backend/flask_api
 python3 -m venv .venv
 source .venv/bin/activate
