@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.sqlite3
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+backend/flask_api/.venv/
+
+# Node
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# Environment files
+.env
+backend/.env
+frontend/.env
+
+# OS artifacts
+.DS_Store
+Thumbs.db
