@@ -1,0 +1,13 @@
+[Unit]
+Description=Gunicorn instance to serve HemoCloud-X API
+After=network.target
+
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/HemoCloud-X/backend/flask_api
+Environment="PATH=/home/ubuntu/HemoCloud-X/backend/flask_api/.venv/bin"
+ExecStart=/home/ubuntu/HemoCloud-X/backend/flask_api/.venv/bin/gunicorn --workers 3 --bind 127.0.0.1:5000 app:app
+
+[Install]
+WantedBy=multi-user.target

@@ -47,7 +47,6 @@ export default function DonorRegister() {
       phone.trim() &&
       isValidEmail(email) &&
       location.trim() &&
-      lastDonationDate &&
       healthStatus.trim() &&
       medicalReportFile &&
       profileImageFile
@@ -58,7 +57,6 @@ export default function DonorRegister() {
     phone,
     email,
     location,
-    lastDonationDate,
     healthStatus,
     medicalReportFile,
     profileImageFile,
@@ -78,10 +76,9 @@ export default function DonorRegister() {
     if (!Number.isFinite(ageNum) || ageNum < 1 || ageNum > 120) errors.push("Age must be 1-120");
     if (!genders.includes(gender)) errors.push("Invalid gender");
     if (!bloodGroups.includes(bloodGroup)) errors.push("Invalid blood group");
-    if (!phone.trim()) errors.push("Phone Number is required");
+    if (phone.replace(/\D/g, "").length !== 10) errors.push("Phone Number must be exactly 10 digits");
     if (!isValidEmail(email)) errors.push("Email is invalid");
     if (!location.trim()) errors.push("Location is required");
-    if (!lastDonationDate) errors.push("Last Donation Date is required");
     if (!healthStatus.trim()) errors.push("Health Status is required");
     if (!medicalReportFile) errors.push("Medical report file is required");
     if (!profileImageFile) errors.push("Profile image file is required");
@@ -119,8 +116,6 @@ export default function DonorRegister() {
       });
 
       setSuccess(res.data?.message || "Registered successfully");
-      const donorId = res.data?.donor?._id;
-      if (donorId) navigate(`/donor/${donorId}`);
     } catch (err) {
       setError(
         getApiErrorMessage(
@@ -159,177 +154,183 @@ export default function DonorRegister() {
           </div>
         </div>
 
-        <form
-          onSubmit={onSubmit}
-          className="rounded-2xl border border-white/10 bg-slate-950/45 p-6 backdrop-blur"
-        >
-          <div className="grid gap-4 md:grid-cols-2">
-            <Field label="Full Name">
-              <input
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-slate-900/30 px-3 py-2 outline-none focus:ring-2 focus:ring-red-400/40"
-                placeholder="e.g., Tharun Kumar"
-              />
-            </Field>
-
-            <Field label="Age">
-              <input
-                value={age}
-                onChange={(e) => setAge(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-slate-900/30 px-3 py-2 outline-none focus:ring-2 focus:ring-red-400/40"
-                placeholder="e.g., 25"
-              />
-            </Field>
-
-            <Field label="Gender">
-              <select
-                value={gender}
-                onChange={(e) => setGender(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-slate-900/30 px-3 py-2 outline-none focus:ring-2 focus:ring-red-400/40"
-              >
-                {genders.map((g) => (
-                  <option key={g} value={g}>
-                    {g}
-                  </option>
-                ))}
-              </select>
-            </Field>
-
-            <Field label="Blood Group">
-              <select
-                value={bloodGroup}
-                onChange={(e) => setBloodGroup(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-slate-900/30 px-3 py-2 outline-none focus:ring-2 focus:ring-red-400/40"
-              >
-                {bloodGroups.map((bg) => (
-                  <option key={bg} value={bg}>
-                    {bg}
-                  </option>
-                ))}
-              </select>
-            </Field>
-
-            <Field label="Phone Number">
-              <input
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-slate-900/30 px-3 py-2 outline-none focus:ring-2 focus:ring-red-400/40"
-                placeholder="e.g., +91 98765 43210"
-              />
-            </Field>
-
-            <Field label="Email">
-              <input
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-slate-900/30 px-3 py-2 outline-none focus:ring-2 focus:ring-red-400/40"
-                placeholder="e.g., donor@example.com"
-              />
-            </Field>
-
-            <Field label="Location (City)">
-              <input
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-slate-900/30 px-3 py-2 outline-none focus:ring-2 focus:ring-red-400/40"
-                placeholder="e.g., Chennai"
-              />
-            </Field>
-
-            <Field label="Last Donation Date">
-              <input
-                type="date"
-                value={lastDonationDate}
-                onChange={(e) => setLastDonationDate(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-slate-900/30 px-3 py-2 outline-none focus:ring-2 focus:ring-red-400/40"
-              />
-            </Field>
-
-            <div className="md:col-span-2">
-              <Field label="Health Status">
+        {success ? (
+          <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-10 text-center backdrop-blur shadow-xl">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/20 text-3xl">
+              ✓
+            </div>
+            <h2 className="text-2xl font-bold tracking-wide text-emerald-100">Details stored successfully!</h2>
+            <p className="mt-2 mb-8 text-emerald-200/70">
+              Your profile has been validated and added to the regional emergency network.
+            </p>
+            <button
+              onClick={() => navigate("/")}
+              className="inline-flex rounded-xl bg-emerald-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600"
+            >
+              Return Home
+            </button>
+          </div>
+        ) : (
+          <form
+            onSubmit={onSubmit}
+            className="rounded-2xl border border-white/10 bg-slate-950/45 p-6 backdrop-blur"
+          >
+            <div className="grid gap-4 md:grid-cols-2">
+              <Field label="Full Name">
                 <input
-                  value={healthStatus}
-                  onChange={(e) => setHealthStatus(e.target.value)}
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
                   className="w-full rounded-xl border border-white/10 bg-slate-900/30 px-3 py-2 outline-none focus:ring-2 focus:ring-red-400/40"
-                  placeholder="e.g., Fit to donate"
+                  placeholder="e.g., Tharun Kumar"
                 />
               </Field>
-            </div>
 
-            <div className="md:col-span-2 grid gap-4 md:grid-cols-2">
-              <Field label="Upload Medical Report">
+              <Field label="Age">
                 <input
-                  type="file"
-                  accept=".pdf,.png,.jpg,.jpeg,.webp,.doc,.docx"
-                  onChange={(e) => setMedicalReportFile(e.target.files?.[0] || null)}
-                  className="w-full text-sm file:mr-3 file:rounded-xl file:border-0 file:bg-red-500 file:px-3 file:py-2 file:text-white file:hover:bg-red-600"
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-slate-900/30 px-3 py-2 outline-none focus:ring-2 focus:ring-red-400/40"
+                  placeholder="e.g., 25"
                 />
-                {medicalReportFile ? (
-                  <div className="mt-2 text-xs text-white/70">
-                    Selected: {medicalReportFile.name}
-                  </div>
-                ) : null}
               </Field>
 
-              <Field label="Profile Image Upload">
+              <Field label="Gender">
+                <select
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-slate-900/30 px-3 py-2 outline-none focus:ring-2 focus:ring-red-400/40"
+                >
+                  {genders.map((g) => (
+                    <option key={g} value={g}>
+                      {g}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+
+              <Field label="Blood Group">
+                <select
+                  value={bloodGroup}
+                  onChange={(e) => setBloodGroup(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-slate-900/30 px-3 py-2 outline-none focus:ring-2 focus:ring-red-400/40"
+                >
+                  {bloodGroups.map((bg) => (
+                    <option key={bg} value={bg}>
+                      {bg}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+
+              <Field label="Phone Number">
                 <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleProfileFileChange(e.target.files?.[0] || null)}
-                  className="w-full text-sm file:mr-3 file:rounded-xl file:border-0 file:bg-red-500 file:px-3 file:py-2 file:text-white file:hover:bg-red-600"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-slate-900/30 px-3 py-2 outline-none focus:ring-2 focus:ring-red-400/40"
+                  placeholder="e.g., 9876543210"
+                  maxLength={15}
                 />
-                {profileImageFile ? (
-                  <div className="mt-2 text-xs text-white/70">
-                    Selected: {profileImageFile.name}
-                  </div>
-                ) : null}
               </Field>
-            </div>
 
-            {previewUrl ? (
+              <Field label="Email">
+                <input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-slate-900/30 px-3 py-2 outline-none focus:ring-2 focus:ring-red-400/40"
+                  placeholder="e.g., donor@example.com"
+                />
+              </Field>
+
+              <Field label="Location (City)">
+                <input
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-slate-900/30 px-3 py-2 outline-none focus:ring-2 focus:ring-red-400/40"
+                  placeholder="e.g., Chennai"
+                />
+              </Field>
+
+              <Field label="Last Donation Date (Optional)">
+                <input
+                  type="date"
+                  value={lastDonationDate}
+                  onChange={(e) => setLastDonationDate(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-slate-900/30 px-3 py-2 outline-none focus:ring-2 focus:ring-red-400/40"
+                />
+              </Field>
+
               <div className="md:col-span-2">
-                <div className="rounded-xl border border-white/10 bg-slate-900/20 p-3">
-                  <div className="text-sm font-medium text-white/80 mb-2">Profile Preview</div>
-                  <img
-                    src={previewUrl}
-                    alt="Profile preview"
-                    className="h-28 w-28 rounded-full object-cover border border-white/10"
+                <Field label="Health Status">
+                  <input
+                    value={healthStatus}
+                    onChange={(e) => setHealthStatus(e.target.value)}
+                    className="w-full rounded-xl border border-white/10 bg-slate-900/30 px-3 py-2 outline-none focus:ring-2 focus:ring-red-400/40"
+                    placeholder="e.g., Fit to donate"
                   />
+                </Field>
+              </div>
+
+              <div className="md:col-span-2 grid gap-4 md:grid-cols-2">
+                <Field label="Upload Medical Report">
+                  <input
+                    type="file"
+                    accept=".pdf,.png,.jpg,.jpeg,.webp,.doc,.docx"
+                    onChange={(e) => setMedicalReportFile(e.target.files?.[0] || null)}
+                    className="w-full text-sm file:mr-3 file:rounded-xl file:border-0 file:bg-red-500 file:px-3 file:py-2 file:text-white file:hover:bg-red-600"
+                  />
+                  {medicalReportFile ? (
+                    <div className="mt-2 text-xs text-white/70">
+                      Selected: {medicalReportFile.name}
+                    </div>
+                  ) : null}
+                </Field>
+
+                <Field label="Profile Image Upload">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleProfileFileChange(e.target.files?.[0] || null)}
+                    className="w-full text-sm file:mr-3 file:rounded-xl file:border-0 file:bg-red-500 file:px-3 file:py-2 file:text-white file:hover:bg-red-600"
+                  />
+                  {profileImageFile ? (
+                    <div className="mt-2 text-xs text-white/70">
+                      Selected: {profileImageFile.name}
+                    </div>
+                  ) : null}
+                </Field>
+              </div>
+
+              {previewUrl ? (
+                <div className="md:col-span-2">
+                  <div className="rounded-xl border border-white/10 bg-slate-900/20 p-3">
+                    <div className="text-sm font-medium text-white/80 mb-2">Profile Preview</div>
+                    <img
+                      src={previewUrl}
+                      alt="Profile preview"
+                      className="h-28 w-28 rounded-full object-cover border border-white/10"
+                    />
+                  </div>
                 </div>
+              ) : null}
+            </div>
+
+            {error ? (
+              <div className="mt-5 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-100">
+                {error}
               </div>
             ) : null}
-          </div>
 
-          {error ? (
-            <div className="mt-5 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-100">
-              {error}
+            <div className="mt-6 flex items-center justify-end gap-3">
+              <button
+                type="submit"
+                disabled={!canSubmit || submitting}
+                className="w-full rounded-xl bg-red-500 px-5 py-3 text-sm font-semibold text-white hover:bg-red-600 disabled:opacity-60 md:w-auto md:px-8"
+              >
+                {submitting ? "Submitting..." : "Register Donor"}
+              </button>
             </div>
-          ) : null}
-          {success ? (
-            <div className="mt-5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-100">
-              {success}
-            </div>
-          ) : null}
-
-          <div className="mt-6 flex items-center justify-end gap-3">
-            <button
-              type="button"
-              onClick={() => navigate("/receiver")}
-              className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm hover:bg-white/10"
-              disabled={submitting}
-            >
-              Go to Receiver
-            </button>
-            <button
-              type="submit"
-              disabled={!canSubmit || submitting}
-              className="rounded-xl bg-red-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-600 disabled:opacity-60"
-            >
-              {submitting ? "Submitting..." : "Register Donor"}
-            </button>
-          </div>
-        </form>
+          </form>
+        )}
       </div>
     </div>
   );

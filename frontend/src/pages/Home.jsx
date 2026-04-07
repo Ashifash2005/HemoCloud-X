@@ -24,59 +24,69 @@ export default function Home() {
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#080d1f] text-white">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-24 top-20 h-72 w-72 rounded-full bg-red-500/25 blur-3xl" />
-        <div className="absolute right-0 top-0 h-96 w-96 rounded-full bg-cyan-400/20 blur-3xl" />
-        <div className="absolute bottom-0 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-red-900/35 blur-3xl" />
+        <div className="absolute -left-10 top-10 h-96 w-96 rounded-full bg-red-500/30 blur-[100px]" />
+        <div className="absolute right-0 top-0 h-96 w-96 rounded-full bg-cyan-400/20 blur-[100px]" />
+        <div className="absolute bottom-0 left-1/2 h-[400px] w-[600px] -translate-x-1/2 rounded-full bg-red-900/40 blur-[120px]" />
       </div>
 
       <div className="relative mx-auto max-w-6xl px-4 py-10 md:py-14">
-        <div className="rounded-3xl border border-white/10 bg-slate-950/40 p-6 md:p-10 backdrop-blur-xl">
+        <div className="rounded-3xl border border-white/10 bg-slate-950/40 p-6 md:p-10 backdrop-blur-xl shadow-2xl">
           <div className="inline-flex items-center gap-2 rounded-full border border-red-300/25 bg-red-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-red-100">
             Regional Emergency Network
           </div>
 
           <div className="mt-6 grid gap-8 md:grid-cols-5">
             <div className="md:col-span-3">
-              <h1 className="font-['Space_Grotesk'] text-4xl font-bold leading-tight text-white md:text-6xl">
-                Find blood support in minutes, not hours.
+              <h1 className="font-['Space_Grotesk'] text-5xl font-extrabold leading-tight text-white md:text-7xl tracking-tight">
+                Find blood support in <span className="text-red-400">minutes</span>, not hours.
               </h1>
-              <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/75 md:text-lg">
+              <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/75 md:text-xl">
                 A city-wide donor coordination platform for urgent and planned requests.
-                Donors can register with medical proof, and receivers can quickly locate
-                matching blood groups by location.
+                Donors can register safely, and receivers can instantly locate matching blood groups nearby.
               </p>
             </div>
 
             <div className="md:col-span-2 grid gap-3 self-start">
-              <div className="rounded-2xl border border-white/15 bg-slate-900/60 p-4">
+              <div className="rounded-2xl border border-white/15 bg-slate-900/60 p-5 shadow-lg backdrop-blur-sm">
                 <div className="text-xs uppercase tracking-[0.18em] text-white/60">Response Readiness</div>
-                <div className="mt-2 text-2xl font-extrabold text-emerald-200">24 x 7</div>
+                <div className="mt-2 text-3xl font-extrabold text-emerald-300">24 x 7</div>
               </div>
-              <div className="rounded-2xl border border-white/15 bg-slate-900/60 p-4">
+              <div className="rounded-2xl border border-white/15 bg-slate-900/60 p-5 shadow-lg backdrop-blur-sm">
                 <div className="text-xs uppercase tracking-[0.18em] text-white/60">Storage Pipeline</div>
-                <div className="mt-2 text-2xl font-extrabold text-cyan-200">AWS S3 + DynamoDB</div>
+                <div className="mt-2 text-3xl font-extrabold text-cyan-300">AWS S3 + DynamoDB</div>
               </div>
             </div>
           </div>
 
-          <div className="mt-8 grid gap-4 md:grid-cols-2">
+          {/* New Impact Statistics Block */}
+          <div className="mt-10 grid gap-4 md:grid-cols-3">
+            <div className="rounded-2xl border border-white/5 bg-gradient-to-br from-white/10 to-transparent p-5 backdrop-blur-sm">
+              <div className="text-sm font-medium text-white/60">Lives impact potential</div>
+              <div className="mt-2 text-3xl font-bold text-white">12,000+</div>
+            </div>
+            <div className="rounded-2xl border border-white/5 bg-gradient-to-br from-white/10 to-transparent p-5 backdrop-blur-sm">
+              <div className="text-sm font-medium text-white/60">Active Donors Needed</div>
+              <div className="mt-2 text-3xl font-bold text-red-200">5,000+</div>
+            </div>
+            <div className="rounded-2xl border border-white/5 bg-gradient-to-br from-white/10 to-transparent p-5 backdrop-blur-sm">
+              <div className="text-sm font-medium text-white/60">Average Search Time</div>
+              <div className="mt-2 text-3xl font-bold text-cyan-200">&lt; 3 mins</div>
+            </div>
+          </div>
+
+          <div className="mt-12 grid gap-5 md:grid-cols-2">
             <HomeCard
-              title="Donor"
-              description="Create or update your donor profile with health history, contact details, and validated report uploads."
+              title="Donor Registration"
+              description="Create or update your donor profile with health history, contact details, and validated medical report uploads."
               to="/donor"
               cta="Register as Donor"
             />
             <HomeCard
-              title="Receiver"
-              description="Search by blood group and city to identify eligible donors quickly during emergencies."
+              title="Receiver Search"
+              description="Search by blood group and city to identify eligible donors quickly during critical emergencies."
               to="/receiver"
               cta="Search for Donors"
             />
-          </div>
-
-          <div className="mt-6 rounded-2xl border border-white/10 bg-slate-900/40 p-4 text-sm text-white/70">
-            Before use: start backend and frontend servers. Receiver search and donor profile
-            image links are generated live from backend APIs.
           </div>
         </div>
       </div>
