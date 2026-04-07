@@ -30,7 +30,7 @@ pip install gunicorn
 echo "Backend dependencies installed."
 
 # 4. Setup Frontend
-echo "VITE_API_BASE_URL=/api" > ~/HemoCloud-X/frontend/.env
+echo "VITE_API_BASE_URL=" > ~/HemoCloud-X/frontend/.env
 cd ~/HemoCloud-X/frontend
 npm install
 npm run build
