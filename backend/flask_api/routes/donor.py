@@ -100,11 +100,12 @@ def _validate_payload(form, files):
     if len(location) < 2 or len(location) > 120:
         errors.append("Invalid location")
 
-    try:
-        last_donation_date = datetime.strptime(last_donation_raw, "%Y-%m-%d").date()
-    except ValueError:
-        last_donation_date = None
-        errors.append("Invalid last donation date")
+    last_donation_date = None
+    if last_donation_raw:
+        try:
+            last_donation_date = datetime.strptime(last_donation_raw, "%Y-%m-%d").date()
+        except ValueError:
+            errors.append("Invalid last donation date format")
 
     if len(health_status) < 2 or len(health_status) > 1000:
         errors.append("Invalid health status")
@@ -158,7 +159,7 @@ def _build_donor(payload, profile_upload, medical_upload):
         "phone": payload["phone"],
         "email": payload["email"],
         "location": payload["location"],
-        "lastDonationDate": _to_iso(payload["lastDonationDate"]),
+        "lastDonationDate": _to_iso(payload["lastDonationDate"]) if payload["lastDonationDate"] else "",
         "healthStatus": payload["healthStatus"],
         "profileImageS3Key": profile_upload["s3Key"],
         "profileImageUrl": profile_upload["url"],
