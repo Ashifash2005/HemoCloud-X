@@ -38,13 +38,13 @@ npm run build
 echo "Frontend built."
 
 # 5. Systemd Configuration for Gunicorn
-sudo mv ~/hemocloud-api.service /etc/systemd/system/hemocloud-api.service
+sudo cp ~/HemoCloud-X/hemocloud-api.service /etc/systemd/system/hemocloud-api.service
 sudo systemctl daemon-reload
 sudo systemctl start hemocloud-api
 sudo systemctl enable hemocloud-api
 
 # 6. NGINX Reverse Proxy Setup
-sudo mv ~/nginx_default /etc/nginx/sites-available/default
+sudo cp ~/HemoCloud-X/nginx_default /etc/nginx/sites-available/default
 
 # Ensure Nginx can read the ubuntu home directory
 sudo chmod 755 /home/ubuntu
