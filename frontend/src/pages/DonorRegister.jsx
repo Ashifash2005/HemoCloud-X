@@ -10,6 +10,13 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+function toTitleCase(str) {
+  return str
+    .trim()
+    .toLowerCase()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 function formatDateForInput(d) {
   if (!d) return "";
   const date = new Date(d);
@@ -105,7 +112,7 @@ export default function DonorRegister() {
       formData.append("bloodGroup", bloodGroup);
       formData.append("phone", phone.trim());
       formData.append("email", email.trim());
-      formData.append("location", location.trim());
+      formData.append("location", toTitleCase(location));
       formData.append("lastDonationDate", lastDonationDate);
       formData.append("healthStatus", healthStatus.trim());
       formData.append("medicalReport", medicalReportFile);
