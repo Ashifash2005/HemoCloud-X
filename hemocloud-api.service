@@ -6,7 +6,8 @@ After=network.target
 User=ubuntu
 Group=www-data
 WorkingDirectory=/home/ubuntu/HemoCloud-X/backend/flask_api
-Environment="PATH=/home/ubuntu/HemoCloud-X/backend/flask_api/.venv/bin"
+EnvironmentFile=/home/ubuntu/HemoCloud-X/backend/.env
+Environment="PATH=/home/ubuntu/HemoCloud-X/backend/flask_api/.venv/bin:/usr/local/bin:/usr/bin:/bin"
 ExecStart=/home/ubuntu/HemoCloud-X/backend/flask_api/.venv/bin/gunicorn --workers 3 --bind 127.0.0.1:5000 app:app
 
 [Install]

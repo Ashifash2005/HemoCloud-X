@@ -194,9 +194,9 @@ def register_donor():
 
     try:
         put_donor_item(donor)
-    except Exception:
+    except Exception as exc:
         current_app.logger.exception("DynamoDB write failed for donor id=%s", donor.get("_id"))
-        return jsonify({"message": "Failed to save donor in DynamoDB"}), 500
+        return jsonify({"message": f"Failed to save donor in DynamoDB: {exc}"}), 500
 
     return jsonify({"message": "Donor registered successfully", "donor": _with_access_urls(donor)}), 201
 
@@ -214,9 +214,9 @@ def search_donors():
 
     try:
         donors = search_donor_items(blood_group, location)
-    except Exception:
+    except Exception as exc:
         current_app.logger.exception("DynamoDB search failed")
-        return jsonify({"message": "Failed to search donors in DynamoDB"}), 500
+        return jsonify({"message": f"Failed to search donors in DynamoDB: [{type(exc).__name__}] {str(exc)}"}), 500
 
     if available_now:
         donors = [d for d in donors if _available_now(d["lastDonationDate"], threshold_days)]
@@ -232,9 +232,9 @@ def get_donor_by_id(donor_id):
 
     try:
         donor = get_donor_item(donor_id)
-    except Exception:
+    except Exception as exc:
         current_app.logger.exception("DynamoDB get failed for donor id=%s", donor_id)
-        return jsonify({"message": "Failed to fetch donor from DynamoDB"}), 500
+        return jsonify({"message": f"Failed to fetch donor from DynamoDB: {exc}"}), 500
 
     if not donor:
         return jsonify({"message": "Donor not found"}), 404

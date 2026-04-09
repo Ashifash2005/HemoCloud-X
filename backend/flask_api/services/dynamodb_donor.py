@@ -1,8 +1,20 @@
+import logging
 import os
 from decimal import Decimal
+from pathlib import Path
 
 import boto3
 from boto3.dynamodb.conditions import Attr, Key
+from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
+from dotenv import load_dotenv
+
+# Ensure .env is loaded even when this module is imported outside of Flask
+# (e.g., under Gunicorn workers). This is a no-op if already loaded.
+_env_path = Path(__file__).resolve().parent.parent.parent / ".env"
+if _env_path.exists():
+    load_dotenv(_env_path, override=False)
+
+logger = logging.getLogger(__name__)
 
 
 def _table_name():
@@ -13,12 +25,24 @@ def _region():
     return os.getenv("DYNAMODB_REGION") or os.getenv("AWS_REGION") or "us-east-1"
 
 
+_cached_resource = None
+
+
+def _get_resource():
+    global _cached_resource
+    if _cached_resource is None:
+        _cached_resource = boto3.resource("dynamodb", region_name=_region())
+    return _cached_resource
+
+
 def _table():
     table = _table_name()
     if not table:
-        raise RuntimeError("Missing DYNAMODB_DONORS_TABLE")
-    resource = boto3.resource("dynamodb", region_name=_region())
-    return resource.Table(table)
+        raise RuntimeError(
+            "Missing DYNAMODB_DONORS_TABLE env var. "
+            "Check that backend/.env exists and contains DYNAMODB_DONORS_TABLE."
+        )
+    return _get_resource().Table(table)
 
 
 def _key_names(table):
@@ -49,7 +73,15 @@ def _decimal_to_native(value):
 
 
 def put_donor_item(donor):
-    table = _table()
+    try:
+        table = _table()
+    except (NoCredentialsError, BotoCoreError) as exc:
+        logger.error("AWS credentials error while accessing DynamoDB: %s", exc)
+        raise RuntimeError(
+            "AWS credentials are missing or invalid. "
+            "Check AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY in backend/.env"
+        ) from exc
+
     partition_key, sort_key = _key_names(table)
 
     location = str(donor.get("location", "")).strip()
@@ -83,7 +115,20 @@ def put_donor_item(donor):
         # Some tables were created with an extra placeholder sort key.
         item[sort_key] = os.getenv("DYNAMODB_DONORS_SORT_KEY_VALUE", "none")
 
-    table.put_item(Item=item)
+    try:
+        table.put_item(Item=item)
+    except NoCredentialsError as exc:
+        logger.error("No AWS credentials found when writing donor: %s", exc)
+        raise
+    except ClientError as exc:
+        error_code = exc.response["Error"]["Code"]
+        logger.error("DynamoDB ClientError on put_item (code=%s): %s", error_code, exc)
+        if error_code == "ResourceNotFoundException":
+            raise RuntimeError(
+                f"DynamoDB table '{_table_name()}' does not exist in region '{_region()}'. "
+                "Create it first or check DYNAMODB_DONORS_TABLE in .env"
+            ) from exc
+        raise
 
 
 def get_donor_item(donor_id):
@@ -103,7 +148,15 @@ def get_donor_item(donor_id):
 
 
 def search_donor_items(blood_group, location):
-    table = _table()
+    try:
+        table = _table()
+    except (NoCredentialsError, BotoCoreError) as exc:
+        logger.error("AWS credentials error while accessing DynamoDB: %s", exc)
+        raise RuntimeError(
+            "AWS credentials are missing or invalid. "
+            "Check AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY in backend/.env"
+        ) from exc
+
     location_normalized = (location or "").strip().lower()
 
     filters = Attr("bloodGroup").eq(blood_group) & Attr("locationNormalized").eq(location_normalized)
@@ -111,16 +164,29 @@ def search_donor_items(blood_group, location):
     results = []
     kwargs = {"FilterExpression": filters}
 
-    while True:
-        resp = table.scan(**kwargs)
-        for raw in resp.get("Items", []):
-            item = _decimal_to_native(raw)
-            results.append(_to_api_donor(item))
+    try:
+        while True:
+            resp = table.scan(**kwargs)
+            for raw in resp.get("Items", []):
+                item = _decimal_to_native(raw)
+                results.append(_to_api_donor(item))
 
-        last_evaluated = resp.get("LastEvaluatedKey")
-        if not last_evaluated:
-            break
-        kwargs["ExclusiveStartKey"] = last_evaluated
+            last_evaluated = resp.get("LastEvaluatedKey")
+            if not last_evaluated:
+                break
+            kwargs["ExclusiveStartKey"] = last_evaluated
+    except NoCredentialsError as exc:
+        logger.error("No AWS credentials found when searching donors: %s", exc)
+        raise
+    except ClientError as exc:
+        error_code = exc.response["Error"]["Code"]
+        logger.error("DynamoDB ClientError on scan (code=%s): %s", error_code, exc)
+        if error_code == "ResourceNotFoundException":
+            raise RuntimeError(
+                f"DynamoDB table '{_table_name()}' does not exist in region '{_region()}'. "
+                "Create it first or check DYNAMODB_DONORS_TABLE in .env"
+            ) from exc
+        raise
 
     results.sort(key=lambda d: d.get("lastDonationDate", ""), reverse=True)
     return results
